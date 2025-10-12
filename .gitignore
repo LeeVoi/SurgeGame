@@ -23,6 +23,7 @@ artifacts/
 
 # Visual Studio cache/options
 .vs/
+.vscode/
 
 # Auto-generated files
 Generated_Code/
