@@ -1,0 +1,94 @@
+# Godot 4+ specific ignores
+.godot/
+/android/
+
+
+# ---- C# / .NET ----
+# Build results
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+[Tt]emp/
+[Tt]mp/
+out/
+artifacts/
+
+# .NET user-specific files
+*.user
+*.userosscache
+*.suo
+*.sln.docstates
+*.rsuser
+
+# Visual Studio cache/options
+.vs/
+
+# Auto-generated files
+Generated_Code/
+
+# NuGet
+*.nupkg
+*.snupkg
+# The packages folder can be restored at build time
+**/[Pp]ackages/*
+!**/[Pp]ackages/build/
+# Uncomment if you have nuget.config in repo
+# nuget.config
+
+# Test results
+[Tt]est[Rr]esult*/
+*.VisualState.xml
+*.coverage
+*.coveragexml
+*.trx
+
+# Entity Framework
+Migrations/
+
+# Rider & ReSharper
+.idea/
+*.DotSettings.user
+_ReSharper*/
+*.sln.iml
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# ---- VS Code ----
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+
+# These files are safe to keep for sharing workspace config,
+# but ignore local workspace history and cache
+.history/
+*.code-workspace
+
+# ---- Docker / Environment ----
+.env
+.env.local
+.env.*.local
+docker-compose.override.yml
+
+# ---- Misc ----
+*.swp
+*.bak
+*.tmp
+*.old
+
+# ---- Optional: ignore user secrets (ASP.NET Core) ----
+secrets.json
+
+# ---- Coverage / Analysis ----
+coverage/
+*.lcov
+*.codecov
+*.report
