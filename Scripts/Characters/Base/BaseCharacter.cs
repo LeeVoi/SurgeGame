@@ -54,7 +54,7 @@ public partial class BaseCharacter : CharacterBody2D
 		{
 			velocity.X = Mathf.MoveToward(Velocity.X, 0, Speed);
 			velocity.Y = Mathf.MoveToward(Velocity.Y, 0, Speed);
-			
+			// hello
 		}
 
 		if (animatedSprite.Animation != "AttackNormal" && animatedSprite.Animation != "AttackHeavy")
