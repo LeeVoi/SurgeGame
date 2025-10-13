@@ -34,7 +34,7 @@ ZwxMe: Software Developer
 
 YassinCh: Game Assets / Level Design
 
-Y A M A N: Game Assets / Level Design and overall support.
+Y A M A N: overall support.
 
 ---
 
