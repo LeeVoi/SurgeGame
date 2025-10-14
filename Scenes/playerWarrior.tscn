@@ -1,7 +1,7 @@
 [gd_scene load_steps=37 format=3 uid="uid://c3k4sk0jgo3lw"]
 
 [ext_resource type="Texture2D" uid="uid://b57qm62ncclsl" path="res://Art/Entities/Warrior/Warrior_Attack2.png" id="1_fkybt"]
-[ext_resource type="Script" uid="uid://bkupgl0147kqo" path="res://Scripts/Characters/Base/BaseCharacter.cs" id="1_w2h6h"]
+[ext_resource type="Script" uid="uid://bfxhb8dm08img" path="res://Scripts/Characters/Players/PlayerWarrior.cs" id="1_w2h6h"]
 [ext_resource type="Texture2D" uid="uid://dm6vwt4nvf8vq" path="res://Art/Entities/Warrior/Warrior_Attack1.png" id="2_x3wgy"]
 [ext_resource type="Texture2D" uid="uid://c0nbigsj53cc5" path="res://Art/Entities/Warrior/Warrior_Guard.png" id="3_3smsa"]
 [ext_resource type="Texture2D" uid="uid://d2sa6g6swqh6v" path="res://Art/Entities/Warrior/Warrior_Idle.png" id="4_8erm5"]
@@ -241,10 +241,8 @@ script = ExtResource("1_w2h6h")
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
 scale = Vector2(0.4, 0.4)
 sprite_frames = SubResource("SpriteFrames_qpa8y")
-animation = &"AttackHeavy"
+animation = &"Guard"
 autoplay = "Idle"
-frame = 3
-frame_progress = 1.0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 position = Vector2(0, 1.1920929e-07)

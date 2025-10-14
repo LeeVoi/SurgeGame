@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=4 uid="uid://cd7fuipfx7pr"]
+[gd_scene load_steps=7 format=4 uid="uid://cd7fuipfx7pr"]
 
 [ext_resource type="TileSet" uid="uid://ccdmiwefc85tk" path="res://Tilesets/Tileset_Ground.tres" id="1_r150o"]
 [ext_resource type="TileSet" uid="uid://b2fx06juo6t6i" path="res://Tilesets/TileSet_Stairs.tres" id="2_pbw6q"]
@@ -6,7 +6,6 @@
 [ext_resource type="TileSet" uid="uid://0twcarkibg1l" path="res://Tilesets/TileSet_Props.tres" id="4_jw32o"]
 [ext_resource type="TileSet" uid="uid://jvqa3t5lt3pk" path="res://Tilesets/TileSet_Trees.tres" id="5_50glp"]
 [ext_resource type="PackedScene" uid="uid://c3k4sk0jgo3lw" path="res://Scenes/playerWarrior.tscn" id="6_v1gob"]
-[ext_resource type="Script" uid="uid://bkupgl0147kqo" path="res://Scripts/Characters/Base/BaseCharacter.cs" id="7_jw32o"]
 
 [node name="Main" type="Node2D"]
 
@@ -38,7 +37,6 @@ tile_set = ExtResource("5_50glp")
 [node name="Systems" type="Node2D" parent="."]
 
 [node name="PlayerWarrior" parent="." instance=ExtResource("6_v1gob")]
-script = ExtResource("7_jw32o")
 
 [node name="Camera2D" type="Camera2D" parent="PlayerWarrior"]
 zoom = Vector2(1.5, 1.5)
