@@ -232,8 +232,8 @@ animations = [{
 }]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_sbwqj"]
-radius = 34.999996
-height = 109.99999
+radius = 11.0
+height = 32.0
 
 [node name="PlayerWarrior" type="CharacterBody2D"]
 script = ExtResource("1_w2h6h")
@@ -241,12 +241,13 @@ script = ExtResource("1_w2h6h")
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
 scale = Vector2(0.4, 0.4)
 sprite_frames = SubResource("SpriteFrames_qpa8y")
-animation = &"Guard"
+animation = &"Run"
 autoplay = "Idle"
+frame = 5
+frame_progress = 0.087604016
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-position = Vector2(0, 1.1920929e-07)
-scale = Vector2(1e-05, 1e-05)
+position = Vector2(-1, -2)
 shape = SubResource("CapsuleShape2D_sbwqj")
 
 [connection signal="animation_finished" from="AnimatedSprite2D" to="." method="_on_animated_sprite_2d_animation_finished"]
