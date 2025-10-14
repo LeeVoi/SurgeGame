@@ -1,6 +1,8 @@
-using Characters.Base.BaseEnemy;
+using Characters.Base;
 using Godot;
 using System.Collections.Generic;
+
+namespace Systems;
 
 public partial class EnemySpawner : Node2D
 {
@@ -8,7 +10,7 @@ public partial class EnemySpawner : Node2D
     [Export] public int EnemiesPerWave = 3;
     [Export] public float SpawnRadius = 200f;
     [Export] public float TimeBetweenSpawns = 1.0f;
-
+    [Export] public int MaxActiveEnemies = 10;
     private Node2D _player;
     private Timer _spawnTimer;
     private List<BaseEnemy> _activeEnemies = new();
@@ -30,7 +32,14 @@ public partial class EnemySpawner : Node2D
         if (EnemyScene == null || _player == null)
             return;
 
-        for (int i = 0; i < EnemiesPerWave; i++)
+        if (_activeEnemies.Count >= MaxActiveEnemies)
+            return;
+
+        // ✅ Calculate how many we can still safely spawn
+        int availableSlots = MaxActiveEnemies - _activeEnemies.Count;
+        int enemiesToSpawn = Mathf.Min(EnemiesPerWave, availableSlots);
+
+        for (int i = 0; i < enemiesToSpawn; i++)
         {
             var enemy = EnemyScene.Instantiate<BaseEnemy>();
             enemy.Position = _player.Position + GetRandomOffset(SpawnRadius);

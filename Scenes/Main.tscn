@@ -60,13 +60,15 @@ tile_set = ExtResource("5_50glp")
 [node name="EnemySpawner" type="Node2D" parent="Systems"]
 script = ExtResource("6_50glp")
 EnemyScene = ExtResource("7_jw32o")
-EnemiesPerWave = 2
-SpawnRadius = 250.0
+EnemiesPerWave = 1
+SpawnRadius = 300.0
+MaxActiveEnemies = 1
 
 [node name="PlayerWarrior" parent="." instance=ExtResource("6_v1gob")]
 position = Vector2(3680, 2608)
 
 [node name="Camera2D" type="Camera2D" parent="PlayerWarrior"]
+zoom = Vector2(3, 3)
 
 [node name="UI" type="CanvasLayer" parent="PlayerWarrior"]
 

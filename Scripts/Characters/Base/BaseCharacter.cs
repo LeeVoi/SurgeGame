@@ -2,7 +2,7 @@ using Godot;
 using System;
 using Characters.Entities.CharacterState;
 
-namespace Characters.Base.BaseCharacter;
+namespace Characters.Base;
 
 public abstract partial class BaseCharacter : CharacterBody2D
 {
@@ -132,7 +132,7 @@ public abstract partial class BaseCharacter : CharacterBody2D
 	
 	// ------------------- Health System ------------------
 
-	protected virtual void TakeDamage(float amount)
+	public virtual void TakeDamage(float amount)
 	{
 		health -= amount;
 		health = Mathf.Max(health, 0);
@@ -141,7 +141,7 @@ public abstract partial class BaseCharacter : CharacterBody2D
 		if (health <= 0)
 		{
 			Console.WriteLine("You Died");
-			//Die();
+			Die();
 		}
 	}
 

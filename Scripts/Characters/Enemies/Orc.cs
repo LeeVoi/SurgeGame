@@ -1,5 +1,5 @@
 using Godot;
-using Characters.Base.BaseEnemy;
+using Characters.Base;
 
 namespace Characters.Enemies;
 public partial class Orc : BaseEnemy
