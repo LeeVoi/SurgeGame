@@ -1,76 +1,104 @@
 using Godot;
 using System;
+using Characters.Entities.CharacterState;
 
 namespace Characters.Base.BaseCharacter;
 
-public partial class BaseCharacter : CharacterBody2D
+public abstract partial class BaseCharacter : CharacterBody2D
 {
 	public const float Speed = 300.0f;
-	public AnimatedSprite2D	animatedSprite;
-	public float facingDirection = 1;
+	protected AnimatedSprite2D	animatedSprite;
+	protected float facingDirection = 1;
+	protected CharacterState currentState = CharacterState.Idle;
 	
-
+	
 	public override void _Ready()
 	{
 		animatedSprite = GetNode<AnimatedSprite2D>("AnimatedSprite2D");
 		animatedSprite.AnimationFinished += OnAnimationFinished;
 	}
-
-	public void OnAnimationFinished()
-	{
-		if (animatedSprite.Animation == "AttackNormal" || animatedSprite.Animation == "AttackHeavy")
-		{
-			animatedSprite.Play("Idle");
-		}
-	}
+	
 	public override void _PhysicsProcess(double delta)
 	{
-		Vector2 velocity = Velocity;
+		HandleInput();
+		HandleMovement();
+		HandleAnimation();
+	}
 
-		if (Input.IsActionJustPressed("AttackNormal"))
+	protected virtual void HandleInput()
+	{
+		if (Input.IsActionPressed("AttackNormal"))
 		{
-			animatedSprite.Play("AttackNormal");
-			
+			currentState = CharacterState.AttackNormal;
 		}
-
-		if (Input.IsActionJustPressed("AttackHeavy"))
+		else if (Input.IsActionPressed("AttackHeavy"))
 		{
-			animatedSprite.Play("AttackHeavy");
-			
+			currentState = CharacterState.AttackHeavy;
 		}
-
-		// Get the input direction and handle the movement/deceleration.
-		// As good practice, you should replace UI actions with custom gameplay actions.
-		Vector2 direction = Input.GetVector("move_left", "move_right", "move_up", "move_down");
-		if (direction != Vector2.Zero)
+		else if (Input.IsActionPressed("SpecialAbility"))
 		{
-			velocity.X = direction.X * Speed;
-			velocity.Y = direction.Y * Speed;
-			facingDirection = direction.X;
-			
-			
+			currentState = CharacterState.SpecialAbility;
 		}
 		else
 		{
-			velocity.X = Mathf.MoveToward(Velocity.X, 0, Speed);
-			velocity.Y = Mathf.MoveToward(Velocity.Y, 0, Speed);
-			// hello
-		}
+			Vector2 direction = Input.GetVector("move_left", "move_right", "move_up", "move_down");
 
-		if (animatedSprite.Animation != "AttackNormal" && animatedSprite.Animation != "AttackHeavy")
+			
+			if (currentState != CharacterState.AttackNormal &&
+			    currentState != CharacterState.AttackHeavy &&
+			    currentState != CharacterState.SpecialAbility)
+			{
+				currentState = direction != Vector2.Zero ? CharacterState.Moving : CharacterState.Idle;
+			}
+		}
+	}
+
+	protected virtual void HandleMovement()
+	{
+		Vector2 direction = Input.GetVector("move_left", "move_right", "move_up", "move_down");
+		if (direction.X != 0)
 		{
-			if (direction != Vector2.Zero)
-			{
-				animatedSprite.Play("Run");
-				animatedSprite.FlipH = direction.X < 0;
-			}
-			else
-			{
-				animatedSprite.Play("Idle");
-			}
+			facingDirection = direction.X;
+			animatedSprite.FlipH = facingDirection < 0;
 		}
-
+		
+		Vector2 velocity = direction * Speed;
 		Velocity = velocity;
 		MoveAndSlide();
 	}
+
+	protected virtual void HandleAnimation()
+	{
+		switch (currentState)
+		{
+			case CharacterState.Idle:
+				animatedSprite.Play("Idle");
+				break;
+			case CharacterState.Moving:
+				animatedSprite.Play("Run");
+				break;
+			case CharacterState.AttackNormal:
+				animatedSprite.Play("AttackNormal");
+				break;
+			case CharacterState.AttackHeavy:
+				animatedSprite.Play("AttackHeavy");
+				break;
+			case CharacterState.SpecialAbility:
+					UseAbility();
+				break;
+		}
+	}
+
+	
+	protected virtual void OnAnimationFinished()
+	{
+		if (animatedSprite.Animation == "AttackNormal" || animatedSprite.Animation == "AttackHeavy")
+		{
+			Vector2 direction = Input.GetVector("move_left", "move_right", "move_up", "move_down");
+			currentState = direction != Vector2.Zero ? CharacterState.Moving : CharacterState.Idle;
+		}
+	}
+	
+	protected abstract void UseAbility();
+	
 }

@@ -4,7 +4,7 @@ public enum CharacterState
 {
     Idle,
     Moving,
-    Guarding,
+    SpecialAbility,
     AttackNormal,
     AttackHeavy,
     Dead
