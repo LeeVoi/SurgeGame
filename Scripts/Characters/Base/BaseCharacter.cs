@@ -2,14 +2,26 @@ using Godot;
 using System;
 using Characters.Entities.CharacterState;
 
-namespace Characters.Base.BaseCharacter;
+namespace Characters.Base;
 
 public abstract partial class BaseCharacter : CharacterBody2D
 {
+	// --------------- Character Movement ---------------
 	public const float Speed = 300.0f;
 	protected AnimatedSprite2D	animatedSprite;
 	protected float facingDirection = 1;
 	protected CharacterState currentState = CharacterState.Idle;
+	// --------------- Stamina System ---------------
+	protected float stamina;
+	protected float maxStamina;
+	protected float staminaRestored;
+	// ------------- Health system ---------------
+	protected float maxHealth; 
+	protected float health;
+	// -------------- UI ---------------
+	protected ProgressBar staminaBar;
+	protected ProgressBar healthBar;
+	
 	
 	
 	public override void _Ready()
@@ -23,22 +35,30 @@ public abstract partial class BaseCharacter : CharacterBody2D
 		HandleInput();
 		HandleMovement();
 		HandleAnimation();
+		stamina = Mathf.Min(maxStamina, stamina + staminaRestored * (float)delta);
 	}
 
 	protected virtual void HandleInput()
 	{
-		if (Input.IsActionPressed("AttackNormal"))
+		if (Input.IsActionPressed("AttackNormal") && CanAttack(10f))
 		{
 			currentState = CharacterState.AttackNormal;
 		}
-		else if (Input.IsActionPressed("AttackHeavy"))
+		else if (Input.IsActionPressed("AttackHeavy") && CanAttack(20f))
 		{
 			currentState = CharacterState.AttackHeavy;
 		}
 		else if (Input.IsActionPressed("SpecialAbility"))
 		{
-			currentState = CharacterState.SpecialAbility;
+			// handled by subclass
+			HandleAbilityInput();
 		}
+		//Temp 
+		else if (Input.IsActionJustReleased("TakeDamage"))
+		{
+			TakeDamage(20f);
+		}
+		//Temp
 		else
 		{
 			Vector2 direction = Input.GetVector("move_left", "move_right", "move_up", "move_down");
@@ -89,7 +109,7 @@ public abstract partial class BaseCharacter : CharacterBody2D
 		}
 	}
 
-	
+	// Reset the animation to Idle or running when done attacking
 	protected virtual void OnAnimationFinished()
 	{
 		if (animatedSprite.Animation == "AttackNormal" || animatedSprite.Animation == "AttackHeavy")
@@ -99,6 +119,51 @@ public abstract partial class BaseCharacter : CharacterBody2D
 		}
 	}
 	
+	
+	// -------------- Stamina System -----------------
+	protected bool SpendStamina(float amount)
+	{
+		if (stamina >= amount)
+		{
+			stamina -= amount;
+			return true;
+		}
+		return false;
+	}
+	
+	protected virtual bool CanAttack(float cost)
+	{
+		return true;
+	}
+	
+	// ------------------- Health System ------------------
+
+	public virtual void TakeDamage(float amount)
+	{
+		health -= amount;
+		health = Mathf.Max(health, 0);
+		UpdateHealthBar();
+
+		if (health <= 0)
+		{
+			Console.WriteLine("You Died");
+			Die();
+		}
+	}
+
+	// Add animations later to make the player die
+	protected virtual void Die()
+	{
+		QueueFree();
+	}
+
+	// Handled by the Character class
+	protected virtual void UpdateHealthBar(){ }
+	
+	// Override to control ability 
+	protected virtual void HandleAbilityInput() { }
+	
+	// Override to create and use own ability in subclass
 	protected abstract void UseAbility();
 	
 }
