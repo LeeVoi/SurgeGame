@@ -6,10 +6,10 @@ public partial class Orc : BaseEnemy
 {
     public override void _Ready()
     {
+        base._Ready();
         Speed = 120f;
         Health = 20;
-        DetectionRange = 250f;
-        AttackDamage = 15;
-        base._Ready();
+        AttackDamage = 5;
+        AttackRange = 20f;
     }
 }
