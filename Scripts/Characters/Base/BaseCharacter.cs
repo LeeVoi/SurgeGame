@@ -6,15 +6,21 @@ namespace Characters.Base;
 
 public abstract partial class BaseCharacter : CharacterBody2D
 {
+	// --------------- Character Movement ---------------
 	public const float Speed = 300.0f;
 	protected AnimatedSprite2D	animatedSprite;
 	protected float facingDirection = 1;
 	protected CharacterState currentState = CharacterState.Idle;
+	// --------------- Stamina System ---------------
 	protected float stamina;
 	protected float maxStamina;
 	protected float staminaRestored;
+	// ------------- Health system ---------------
 	protected float maxHealth; 
 	protected float health;
+	// -------------- UI ---------------
+	protected ProgressBar staminaBar;
+	protected ProgressBar healthBar;
 	
 	
 	
@@ -44,7 +50,8 @@ public abstract partial class BaseCharacter : CharacterBody2D
 		}
 		else if (Input.IsActionPressed("SpecialAbility"))
 		{
-			currentState = CharacterState.SpecialAbility;
+			// handled by subclass
+			HandleAbilityInput();
 		}
 		//Temp 
 		else if (Input.IsActionJustReleased("TakeDamage"))
@@ -102,7 +109,7 @@ public abstract partial class BaseCharacter : CharacterBody2D
 		}
 	}
 
-	
+	// Reset the animation to Idle or running when done attacking
 	protected virtual void OnAnimationFinished()
 	{
 		if (animatedSprite.Animation == "AttackNormal" || animatedSprite.Animation == "AttackHeavy")
@@ -111,7 +118,6 @@ public abstract partial class BaseCharacter : CharacterBody2D
 			currentState = direction != Vector2.Zero ? CharacterState.Moving : CharacterState.Idle;
 		}
 	}
-	protected abstract void UseAbility();
 	
 	
 	// -------------- Stamina System -----------------
@@ -153,5 +159,11 @@ public abstract partial class BaseCharacter : CharacterBody2D
 
 	// Handled by the Character class
 	protected virtual void UpdateHealthBar(){ }
+	
+	// Override to control ability 
+	protected virtual void HandleAbilityInput() { }
+	
+	// Override to create and use own ability in subclass
+	protected abstract void UseAbility();
 	
 }
