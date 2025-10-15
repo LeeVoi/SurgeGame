@@ -110,17 +110,18 @@ public partial class BaseEnemy : CharacterBody2D
             return;
 
         _attackCooldownTimer = AttackCooldown;
-        AttackPlayer();
-    }
-
-    private async void AttackPlayer()
-    {
         // get the animation player once
-        var animPlayer = GetNode<AnimationPlayer>("AnimationPlayer");   // currently does nothing other than play the animation.
-                                                                        // Later we can hook into animation events to time the damage application for a specific frame.
-
+        var animPlayer = GetNode<AnimationPlayer>("AnimationPlayer");   // Uses engine to cook a signal call to the AttackPlayer()
         // play the attack animation
         animPlayer.Play("Attack");
+    }
+
+    /// <summary>
+    /// This method is hooked to an engine event call on a specific frame.
+    /// When method is called damage is applied.
+    /// </summary>
+    private void AttackPlayer()
+    {
 
         // apply the damage at that exact point
         if (_player is BaseCharacter playerCharacter)
@@ -136,9 +137,6 @@ public partial class BaseEnemy : CharacterBody2D
         {
             GD.Print("No player reference — cannot attack.");
         }
-
-        // optionally wait for the animation to finish before continuing
-        await ToSignal(animPlayer, "animation_finished");
     }
 
 

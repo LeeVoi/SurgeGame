@@ -9,6 +9,7 @@ public partial class Orc : BaseEnemy
         Speed = 120f;
         Health = 20;
         DetectionRange = 250f;
+        AttackDamage = 15;
         base._Ready();
     }
 }
