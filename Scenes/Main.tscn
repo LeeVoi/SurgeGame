@@ -6,8 +6,8 @@
 [ext_resource type="TileSet" uid="uid://0twcarkibg1l" path="res://Tilesets/TileSet_Props.tres" id="4_jw32o"]
 [ext_resource type="TileSet" uid="uid://jvqa3t5lt3pk" path="res://Tilesets/TileSet_Trees.tres" id="5_50glp"]
 [ext_resource type="Script" uid="uid://cb540te6pea8g" path="res://Scripts/Systems/EnemySpawner.cs" id="6_50glp"]
-[ext_resource type="PackedScene" uid="uid://c3k4sk0jgo3lw" path="res://Scenes/playerWarrior.tscn" id="6_v1gob"]
-[ext_resource type="PackedScene" uid="uid://cdf3pj30kc7j3" path="res://Scenes/Orc.tscn" id="7_jw32o"]
+[ext_resource type="PackedScene" uid="uid://c3k4sk0jgo3lw" path="res://Scenes/Characters/Player/playerWarrior.tscn" id="6_v1gob"]
+[ext_resource type="PackedScene" uid="uid://cdf3pj30kc7j3" path="res://Scenes/Characters/Enemies/Orc.tscn" id="7_jw32o"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_50glp"]
 bg_color = Color(0.27004492, 0.64340675, 0.26176265, 1)
@@ -67,7 +67,6 @@ SpawnRadius = 300.0
 position = Vector2(3680, 2608)
 
 [node name="Camera2D" type="Camera2D" parent="PlayerWarrior"]
-zoom = Vector2(3, 3)
 
 [node name="UI" type="CanvasLayer" parent="."]
 

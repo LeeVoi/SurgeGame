@@ -35,7 +35,7 @@ public partial class EnemySpawner : Node2D
         if (_activeEnemies.Count >= MaxActiveEnemies)
             return;
 
-        // ✅ Calculate how many we can still safely spawn
+        // Calculate how many we can still spawn
         int availableSlots = MaxActiveEnemies - _activeEnemies.Count;
         int enemiesToSpawn = Mathf.Min(EnemiesPerWave, availableSlots);
 

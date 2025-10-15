@@ -1,4 +1,4 @@
-[gd_scene load_steps=37 format=3 uid="uid://c3k4sk0jgo3lw"]
+[gd_scene load_steps=40 format=3 uid="uid://c3k4sk0jgo3lw"]
 
 [ext_resource type="Texture2D" uid="uid://b57qm62ncclsl" path="res://Art/Entities/Warrior/Warrior_Attack2.png" id="1_fkybt"]
 [ext_resource type="Script" uid="uid://bfxhb8dm08img" path="res://Scripts/Characters/Players/PlayerWarrior.cs" id="1_w2h6h"]
@@ -231,6 +231,81 @@ animations = [{
 "speed": 10.0
 }]
 
+[sub_resource type="Animation" id="Animation_w2h6h"]
+resource_name = "AttackNormal"
+length = 0.4
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("AnimatedSprite2D:animation")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.10000001, 0.20000002, 0.3, 0.4),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1),
+"update": 1,
+"values": [&"AttackNormal", &"AttackNormal", &"AttackNormal", &"AttackNormal", &"AttackNormal"]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("AnimatedSprite2D:frame")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.10000001, 0.20000002, 0.3),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
+"update": 1,
+"values": [1, 1, 2, 3]
+}
+tracks/2/type = "method"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath(".")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0.23333333),
+"transitions": PackedFloat32Array(1),
+"values": [{
+"args": [],
+"method": &"Die"
+}]
+}
+
+[sub_resource type="Animation" id="Animation_k0imi"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("AnimatedSprite2D:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [1]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("AnimatedSprite2D:animation")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [&"AttackNormal"]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_h42qk"]
+_data = {
+&"AttackNormal": SubResource("Animation_w2h6h"),
+&"RESET": SubResource("Animation_k0imi")
+}
+
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_sbwqj"]
 radius = 11.0
 height = 32.0
@@ -241,10 +316,14 @@ script = ExtResource("1_w2h6h")
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
 scale = Vector2(0.4, 0.4)
 sprite_frames = SubResource("SpriteFrames_qpa8y")
-animation = &"Run"
+animation = &"AttackNormal"
 autoplay = "Idle"
-frame = 5
-frame_progress = 0.087604016
+frame = 1
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+libraries = {
+&"": SubResource("AnimationLibrary_h42qk")
+}
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 position = Vector2(-1, -2)
