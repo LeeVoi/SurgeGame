@@ -3,34 +3,59 @@ using System;
 using System.Reflection.Metadata;
 using Characters.Base.Components.PlayerHelpers;
 using Characters.Entities.CharacterState;
+using Characters.Base.Components.CombatSystem.Interfaces;
+using Characters.Base.Components.CombatSystem;
 
 namespace Characters.Base;
 
-public abstract partial class BaseCharacter : CharacterBody2D
+public abstract partial class BaseCharacter : CharacterBody2D, IDamageable
 {
 	public PlayerMovement Movement { get; private set; }
-	public PlayerAnimation Animation  { get; private set; }
-	
+	public PlayerAnimation Animation { get; private set; }
+
 	// --------------- Stamina System ---------------
 	protected float stamina;
 	protected float maxStamina;
 	protected float staminaRestored;
 	// ------------- Health system ---------------
-	protected float maxHealth; 
+	protected float maxHealth;
 	protected float health;
 	// -------------- UI ---------------
 	protected ProgressBar staminaBar;
 	protected ProgressBar healthBar;
-	
-	
-	
+
+
+	// -------------- Combat ---------------
+	protected HitBox _hitBox;
+	protected HurtBox _hurtBox;
+
+	[Export] public int AttackDamage { get; set; } = 20;
+
+
 	public override void _Ready()
 	{
-		Movement = new PlayerMovement(this);
 		Animation = new PlayerAnimation(this);
-		
+		Movement = new PlayerMovement(this);
+
+		// --- Set up hurtbox (for receiving hits)
+		_hurtBox = GetNodeOrNull<HurtBox>("HurtBox");
+		if (_hurtBox != null)
+			_hurtBox.OwnerPath = GetPath();
+		else
+			GD.PrintErr($"{Name} has no HurtBox node!");
+
+		// --- Set up hitbox (for dealing damage)
+		_hitBox = GetNodeOrNull<HitBox>("AnimatedSprite2D/HitBox");
+		if (_hitBox != null)
+		{
+			_hitBox.OwnerPath = GetPath();
+			_hitBox.HitDetected += OnHitDetected;
+			_hitBox.Deactivate(); // start disabled
+		}
+		else
+			GD.PrintErr($"{Name} has no HitBox node!");
 	}
-	
+
 	public override void _PhysicsProcess(double delta)
 	{
 		//Handle input and animation state
@@ -41,8 +66,28 @@ public abstract partial class BaseCharacter : CharacterBody2D
 		// Restore stamina
 		stamina = Mathf.Min(maxStamina, stamina + staminaRestored * (float)delta);
 	}
-	
-	
+
+	// -------------- Combat logic -----------------
+	protected virtual void OnHitDetected(HurtBox hurtbox)
+	{
+		if (hurtbox.Owner is IDamageable target)
+			target.TakeDamage(AttackDamage, this);
+	}
+
+	// These are called by the AnimationPlayer during attack frames
+	public void ActivateHitBox()
+	{
+		_hitBox?.Activate();
+		GD.Print($"{Name} activated HitBox!");
+	}
+
+	public void DeactivateHitBox()
+	{
+		_hitBox?.Deactivate();
+		GD.Print($"{Name} deactivated HitBox!");
+	}
+
+
 	// -------------- Stamina System -----------------
 	public bool SpendStamina(float amount)
 	{
@@ -58,17 +103,18 @@ public abstract partial class BaseCharacter : CharacterBody2D
 	{
 		return true;
 	}
-	
+
 	// ------------------- Health System ------------------
-	public virtual void TakeDamage(float amount)
+	public virtual void TakeDamage(int amount, Node2D attacker)
 	{
 		health -= amount;
 		health = Mathf.Max(health, 0);
+		GD.Print($"{Name} hit by {attacker.Name}, health now {health}");
 		UpdateHealthBar();
 
 		if (health <= 0)
 		{
-			Console.WriteLine("You Died");
+			GD.Print($"{Name} died.");
 			Die();
 		}
 	}
@@ -80,8 +126,8 @@ public abstract partial class BaseCharacter : CharacterBody2D
 	}
 
 	// Handled by the Character class
-	protected virtual void UpdateHealthBar(){ }
-	
+	protected virtual void UpdateHealthBar() { }
+
 	// Override to control ability 
 	public virtual void HandleAbilityInput() { }
 	public abstract void UseAbility();
@@ -91,5 +137,5 @@ public abstract partial class BaseCharacter : CharacterBody2D
 	{
 		Animation.UpdateInput();
 	}
-	
+
 }

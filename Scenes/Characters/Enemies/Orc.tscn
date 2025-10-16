@@ -1,4 +1,4 @@
-[gd_scene load_steps=40 format=3 uid="uid://cdf3pj30kc7j3"]
+[gd_scene load_steps=44 format=3 uid="uid://cdf3pj30kc7j3"]
 
 [ext_resource type="Texture2D" uid="uid://bv6raee84tx73" path="res://Art/Entities/Enemies/Orc/Orc-Death.png" id="1_4gh4o"]
 [ext_resource type="Script" uid="uid://dvavs4vv3mi4y" path="res://Scripts/Characters/Enemies/Orc.cs" id="1_r36w4"]
@@ -6,6 +6,8 @@
 [ext_resource type="Texture2D" uid="uid://b0nds50uotv5m" path="res://Art/Entities/Enemies/Orc/Orc-Hurt.png" id="2_r36w4"]
 [ext_resource type="Texture2D" uid="uid://be6jwuhb556i3" path="res://Art/Entities/Enemies/Orc/Orc-Idle.png" id="3_j1tww"]
 [ext_resource type="Texture2D" uid="uid://dlm0kd0cbfd4h" path="res://Art/Entities/Enemies/Orc/Orc-Walk.png" id="4_qqqva"]
+[ext_resource type="Script" uid="uid://bunsx1qcfdex0" path="res://Scripts/Characters/Base/Components/CombatSystem/HitBox.cs" id="7_j8k40"]
+[ext_resource type="Script" uid="uid://dw4868oholwxg" path="res://Scripts/Characters/Base/Components/CombatSystem/HurtBox.cs" id="8_p8tvc"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_qqqva"]
 atlas = ExtResource("2_j1tww")
@@ -158,7 +160,7 @@ animations = [{
 "texture": SubResource("AtlasTexture_bv38b")
 }],
 "loop": false,
-"name": &"Death",
+"name": &"Die",
 "speed": 10.0
 }, {
 "frames": [{
@@ -231,10 +233,13 @@ animations = [{
 "speed": 10.0
 }]
 
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_ia1lh"]
+radius = 1.7320509
+
 [sub_resource type="Animation" id="Animation_j1tww"]
 resource_name = "Attack"
 length = 0.6
-step = 0.1
+step = 0.05
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
@@ -259,18 +264,33 @@ tracks/1/keys = {
 "update": 0,
 "values": [&"Attack", &"Attack", &"Attack", &"Attack", &"Attack", &"Attack", &"Attack"]
 }
-tracks/2/type = "method"
+tracks/2/type = "value"
 tracks/2/imported = false
 tracks/2/enabled = true
-tracks/2/path = NodePath(".")
+tracks/2/path = NodePath("AnimatedSprite2D/HitBox/HitBoxCollision:shape")
 tracks/2/interp = 1
 tracks/2/loop_wrap = true
 tracks/2/keys = {
-"times": PackedFloat32Array(0.3),
-"transitions": PackedFloat32Array(1),
+"times": PackedFloat32Array(0, 0.6),
+"transitions": PackedFloat32Array(1, 1),
+"update": 1,
+"values": [SubResource("CapsuleShape2D_ia1lh"), SubResource("CapsuleShape2D_ia1lh")]
+}
+tracks/3/type = "method"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath(".")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"times": PackedFloat32Array(0.25, 0.45),
+"transitions": PackedFloat32Array(1, 1),
 "values": [{
 "args": [],
-"method": &"AttackPlayer"
+"method": &"ActivateHitbox"
+}, {
+"args": [],
+"method": &"DeactivateHitbox"
 }]
 }
 
@@ -300,6 +320,18 @@ tracks/1/keys = {
 "update": 0,
 "values": [1]
 }
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("AnimatedSprite2D/HitBox/HitBoxCollision:shape")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [SubResource("CapsuleShape2D_ia1lh")]
+}
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_ijxpa"]
 _data = {
@@ -308,6 +340,10 @@ _data = {
 }
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_gm4yo"]
+radius = 6.0
+height = 16.0
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_vr4f2"]
 radius = 6.0
 height = 16.0
 
@@ -320,11 +356,26 @@ animation = &"Attack"
 autoplay = "Idle"
 frame = 1
 
+[node name="HitBox" type="Area2D" parent="AnimatedSprite2D"]
+position = Vector2(11, -6)
+script = ExtResource("7_j8k40")
+
+[node name="HitBoxCollision" type="CollisionShape2D" parent="AnimatedSprite2D/HitBox"]
+position = Vector2(7, 3)
+rotation = -0.5235988
+shape = SubResource("CapsuleShape2D_ia1lh")
+
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
 libraries = {
 &"": SubResource("AnimationLibrary_ijxpa")
 }
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-position = Vector2(1, 0)
 shape = SubResource("CapsuleShape2D_gm4yo")
+
+[node name="HurtBox" type="Area2D" parent="."]
+script = ExtResource("8_p8tvc")
+
+[node name="HurtBoxCollision" type="CollisionShape2D" parent="HurtBox"]
+shape = SubResource("CapsuleShape2D_vr4f2")
+debug_color = Color(0.99878067, 0, 0.14502195, 0.41960785)

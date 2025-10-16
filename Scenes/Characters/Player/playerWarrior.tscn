@@ -1,4 +1,4 @@
-[gd_scene load_steps=40 format=3 uid="uid://c3k4sk0jgo3lw"]
+[gd_scene load_steps=44 format=3 uid="uid://c3k4sk0jgo3lw"]
 
 [ext_resource type="Texture2D" uid="uid://b57qm62ncclsl" path="res://Art/Entities/Warrior/Warrior_Attack2.png" id="1_fkybt"]
 [ext_resource type="Script" uid="uid://bfxhb8dm08img" path="res://Scripts/Characters/Players/PlayerWarrior.cs" id="1_w2h6h"]
@@ -6,6 +6,8 @@
 [ext_resource type="Texture2D" uid="uid://c0nbigsj53cc5" path="res://Art/Entities/Warrior/Warrior_Guard.png" id="3_3smsa"]
 [ext_resource type="Texture2D" uid="uid://d2sa6g6swqh6v" path="res://Art/Entities/Warrior/Warrior_Idle.png" id="4_8erm5"]
 [ext_resource type="Texture2D" uid="uid://duoe7dt3x3wqo" path="res://Art/Entities/Warrior/Warrior_Run.png" id="5_f1ek2"]
+[ext_resource type="Script" uid="uid://bunsx1qcfdex0" path="res://Scripts/Characters/Base/Components/CombatSystem/HitBox.cs" id="7_cpcma"]
+[ext_resource type="Script" uid="uid://dw4868oholwxg" path="res://Scripts/Characters/Base/Components/CombatSystem/HurtBox.cs" id="8_bioha"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_tx1dd"]
 atlas = ExtResource("1_fkybt")
@@ -231,9 +233,14 @@ animations = [{
 "speed": 10.0
 }]
 
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_cpcma"]
+radius = 10.7942295
+height = 72.15767
+
 [sub_resource type="Animation" id="Animation_w2h6h"]
 resource_name = "AttackNormal"
 length = 0.4
+step = 0.05
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
@@ -258,18 +265,33 @@ tracks/1/keys = {
 "update": 1,
 "values": [1, 1, 2, 3]
 }
-tracks/2/type = "method"
+tracks/2/type = "value"
 tracks/2/imported = false
 tracks/2/enabled = true
-tracks/2/path = NodePath(".")
+tracks/2/path = NodePath("AnimatedSprite2D/HitBox/HitBoxCollision:shape")
 tracks/2/interp = 1
 tracks/2/loop_wrap = true
 tracks/2/keys = {
-"times": PackedFloat32Array(0.23333333),
-"transitions": PackedFloat32Array(1),
+"times": PackedFloat32Array(0, 0.4),
+"transitions": PackedFloat32Array(1, 1),
+"update": 1,
+"values": [SubResource("CapsuleShape2D_cpcma"), SubResource("CapsuleShape2D_cpcma")]
+}
+tracks/3/type = "method"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath(".")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"times": PackedFloat32Array(0.2, 0.4),
+"transitions": PackedFloat32Array(1, 1),
 "values": [{
 "args": [],
-"method": &"Die"
+"method": &"ActivateHitBox"
+}, {
+"args": [],
+"method": &"DeactivateHitBox"
 }]
 }
 
@@ -299,6 +321,18 @@ tracks/1/keys = {
 "update": 1,
 "values": [&"AttackNormal"]
 }
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("AnimatedSprite2D/HitBox/HitBoxCollision:shape")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [SubResource("CapsuleShape2D_cpcma")]
+}
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_h42qk"]
 _data = {
@@ -310,6 +344,10 @@ _data = {
 radius = 11.0
 height = 32.0
 
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_oqm65"]
+radius = 9.0
+height = 24.0
+
 [node name="PlayerWarrior" type="CharacterBody2D"]
 script = ExtResource("1_w2h6h")
 
@@ -320,6 +358,17 @@ animation = &"AttackNormal"
 autoplay = "Idle"
 frame = 1
 
+[node name="HitBox" type="Area2D" parent="AnimatedSprite2D"]
+position = Vector2(47.499996, -4.9999995)
+scale = Vector2(2.4999998, 2.4999998)
+script = ExtResource("7_cpcma")
+
+[node name="HitBoxCollision" type="CollisionShape2D" parent="AnimatedSprite2D/HitBox"]
+position = Vector2(1.0728836e-06, -16)
+rotation = -0.5235988
+shape = SubResource("CapsuleShape2D_cpcma")
+debug_color = Color(0.6745991, 0.50635165, 0, 0.41960785)
+
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
 libraries = {
 &"": SubResource("AnimationLibrary_h42qk")
@@ -328,5 +377,13 @@ libraries = {
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 position = Vector2(-1, -2)
 shape = SubResource("CapsuleShape2D_sbwqj")
+
+[node name="HurtBox" type="Area2D" parent="."]
+script = ExtResource("8_bioha")
+
+[node name="HurtBoxCollision" type="CollisionShape2D" parent="HurtBox"]
+position = Vector2(-1, -2)
+shape = SubResource("CapsuleShape2D_oqm65")
+debug_color = Color(0.99805576, 0, 0.16241255, 0.41960785)
 
 [connection signal="animation_finished" from="AnimatedSprite2D" to="." method="_on_animated_sprite_2d_animation_finished"]

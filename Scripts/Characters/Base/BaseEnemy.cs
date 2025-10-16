@@ -1,6 +1,8 @@
 using Godot;
 using Characters.Base.Components.EnemyHelpers;
 using System;
+using Characters.Base.Components.CombatSystem;
+using Characters.Base.Components.CombatSystem.Interfaces;
 
 namespace Characters.Base;
 
@@ -9,11 +11,12 @@ namespace Characters.Base;
 /// Handles chasing and attacking the player.
 /// Other enemy types should inherit from this.
 /// </summary>
-public partial class BaseEnemy : CharacterBody2D
+public partial class BaseEnemy : CharacterBody2D, IDamageable
 {
     private EnemyMovement _movement;
     private EnemyCombat _combat;
     private EnemyAimation _animation;
+    private HurtBox _hurtBox;
 
     private Node2D _player;
     private bool _allowChasing = true;
@@ -47,6 +50,10 @@ public partial class BaseEnemy : CharacterBody2D
         _movement = new EnemyMovement(this);
         _combat = new EnemyCombat(this);
         _animation = new EnemyAimation(this);
+
+        _hurtBox = GetNodeOrNull<HurtBox>("HurtBox");
+        if (_hurtBox != null)
+            _hurtBox.OwnerPath = GetPath();
 
         _state = EnemyState.Idle;
     }
@@ -90,18 +97,11 @@ public partial class BaseEnemy : CharacterBody2D
     }
 
     /// <summary>
-    /// Called by the AnimationPlayer during the attack animation
-    /// at the exact frame when the hit should connect.
+    /// This method applies damage to the target.
     /// </summary>
-    public void AttackPlayer()
-    {
-        if (_state == EnemyState.Dead || _player == null)
-            return;
-
-        _combat.DealDamage(_player);
-    }
-
-    public void TakeDamage(int amount)
+    /// <param name="amount"> amount of damage to apply to the target</param>
+    /// <param name="attacker"> Right now not used for anything</param>
+    public void TakeDamage(int amount, Node2D attacker)
     {
         if (_state == EnemyState.Dead)
             return;
@@ -117,6 +117,16 @@ public partial class BaseEnemy : CharacterBody2D
         _state = EnemyState.Dead;
         _animation.PlayState(_state);
 
+        // Disable collisions safely after physics query.
+        var collider = GetNodeOrNull<CollisionShape2D>("CollisionShape2D");
+        if (collider != null)
+            collider.SetDeferred("disabled", true);
+
+        // Stop physics immediately.
+        SetPhysicsProcess(false);
+        Velocity = Vector2.Zero;
+
+        // wait for death animation.
         var animPlayer = GetNodeOrNull<AnimationPlayer>("AnimationPlayer");
         if (animPlayer != null)
             await ToSignal(animPlayer, "animation_finished");
@@ -128,6 +138,18 @@ public partial class BaseEnemy : CharacterBody2D
     {
         _player = player;
         _allowChasing = allowChasing;
+    }
+
+    // Called from AnimationPlayer
+    public void ActivateHitbox()
+    {
+        _combat?.ActivateHitbox();
+    }
+
+    // Called from AnimationPlayer
+    public void DeactivateHitbox()
+    {
+        _combat?.DeactivateHitbox();
     }
     public override void _Draw()
     {

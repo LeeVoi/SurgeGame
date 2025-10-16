@@ -1,4 +1,6 @@
 
+using Characters.Base.Components.CombatSystem;
+using Characters.Base.Components.CombatSystem.Interfaces;
 using Godot;
 
 namespace Characters.Base.Components.EnemyHelpers;
@@ -14,6 +16,7 @@ public class EnemyCombat
     // --- References ---
     private readonly BaseEnemy _enemy;             // Reference to the enemy
     private readonly AnimationPlayer _anim;        // Animation player controlling attack animations
+    private readonly HitBox _hitBox;
 
     // --- Attack parameters ---
     /// <summary>
@@ -47,6 +50,22 @@ public class EnemyCombat
     {
         _enemy = enemy;
         _anim = enemy.GetNodeOrNull<AnimationPlayer>("AnimationPlayer");
+        _hitBox = enemy.GetNodeOrNull<HitBox>("AnimatedSprite2D/HitBox");
+
+        if (_hitBox == null)
+            GD.PrintErr($"{enemy.Name} has no HitBox node!");
+
+        if (_hitBox != null)
+        {
+            _hitBox.OwnerPath = enemy.GetPath();
+            _hitBox.HitDetected += OnHitDetected;
+        }
+    }
+
+    public void OnHitDetected(HurtBox hurtBox)
+    {
+        if (hurtBox.Owner is IDamageable target)
+            target.TakeDamage(Damage, _enemy);
     }
 
     /// <summary>
@@ -73,6 +92,10 @@ public class EnemyCombat
         _anim?.Play("Attack");
     }
 
+    // ANimationPlayer calls these in the engin (via method tracks).
+    public void ActivateHitbox() => _hitBox?.Activate();
+    public void DeactivateHitbox() => _hitBox.Deactivate();
+
     /// <summary>
     /// Applies damage to the given target.
     /// Typically called from the Attack animation at the impact frame.
@@ -81,6 +104,6 @@ public class EnemyCombat
     public virtual void DealDamage(Node2D target)
     {
         if (target is BaseCharacter character)
-            character.TakeDamage(Damage);
+            character.TakeDamage(Damage, target);
     }
 }

@@ -8,14 +8,21 @@ public class PlayerAnimation
     // Defining Variables 
     private readonly BaseCharacter _player;
     public AnimatedSprite2D animatedSprite { get; private set; }
-    public CharacterState CurrentState  {get; private set;} = CharacterState.Idle;
+    private AnimationPlayer _animPlayer;
+    public CharacterState CurrentState { get; private set; } = CharacterState.Idle;
     private bool attackLocked = false;
 
     public PlayerAnimation(BaseCharacter player)
     {
         _player = player;
         animatedSprite = player.GetNode<AnimatedSprite2D>("AnimatedSprite2D");
-        animatedSprite.AnimationFinished += OnAnimationFinished;
+        _animPlayer = player.GetNodeOrNull<AnimationPlayer>("AnimationPlayer");
+
+        if (animatedSprite != null)
+            animatedSprite.AnimationFinished += OnAnimationFinished;
+
+        if (_animPlayer == null)
+            GD.PrintErr($"{player.Name} has no AnimationPlayer!");
     }
 
     public void UpdateAnimation()
@@ -29,31 +36,28 @@ public class PlayerAnimation
                 PlayIfNot("Run");
                 break;
             case CharacterState.AttackNormal:
-                PlayIfNot("AttackNormal");
-                break;
             case CharacterState.AttackHeavy:
-                PlayIfNot("AttackHeavy");
                 break;
             case CharacterState.SpecialAbility:
                 _player.UseAbility();
                 break;
         }
-        
+
     }
 
     public void UpdateInput()
     {
         if (attackLocked)
             return;
-        
+
         if (Input.IsActionPressed("AttackNormal") && _player.CanAttack(10f))
         {
-            StartAttack(CharacterState.AttackNormal,10f);
-            
+            StartAttack(CharacterState.AttackNormal, "AttackNormal", 10f);
+
         }
         else if (Input.IsActionPressed("AttackHeavy") && _player.CanAttack(20f))
         {
-            StartAttack(CharacterState.AttackHeavy,20f);
+            StartAttack(CharacterState.AttackHeavy, "AttackHeavy", 20f);
         }
         else if (Input.IsActionPressed("SpecialAbility"))
         {
@@ -62,29 +66,29 @@ public class PlayerAnimation
         }
         else
         {
-           UpdateMovementState();
+            UpdateMovementState();
         }
     }
-    
+
 
     private void OnAnimationFinished()
     {
         if (animatedSprite.Animation == "AttackNormal" || animatedSprite.Animation == "AttackHeavy")
         {
             ResetToIdleOrMove();
-            attackLocked  = false;
+            attackLocked = false;
         }
     }
-    
-// ´------------------Movement & State ---------------------
+
+    // ´------------------Movement & State ---------------------
     private void ResetToIdleOrMove()
     {
         Vector2 direction = Input.GetVector("move_left", "move_right", "move_up", "move_down");
         CurrentState = direction != Vector2.Zero ? CharacterState.Moving : CharacterState.Idle;
         PlayIfNot(CurrentState == CharacterState.Moving ? "Run" : "Idle");
     }
-    
-    
+
+
     // -------------- HelperS ----------------
     private void PlayIfNot(string animationName)
     {
@@ -106,13 +110,19 @@ public class PlayerAnimation
         }
     }
 
-    private void StartAttack(CharacterState attackType, float staminaCost)
+    private void StartAttack(CharacterState attackType, string animName, float staminaCost)
     {
         _player.SpendStamina(staminaCost);
         CurrentState = attackType;
         attackLocked = true;
+
+        // Play attack animation via AnimationPlayer
+        if (_animPlayer != null)
+            _animPlayer.Play(animName);
+        else
+            GD.PrintErr($"{_player.Name} missing AnimationPlayer for attacks!");
     }
-    
+
     // Get and Set the state of the player
     public void SetState(CharacterState newState) => CurrentState = newState;
 

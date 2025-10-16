@@ -8,7 +8,7 @@ public partial class Orc : BaseEnemy
     {
         base._Ready();
         Speed = 120f;
-        Health = 20;
+        Health = 10;
         AttackDamage = 5;
         AttackRange = 20f;
     }

@@ -62,10 +62,7 @@ public class EnemyMovement
 
     private void FlipSprite()
     {
-        if (_sprite == null) return;
-
-        // Only flip when moving horizontally
-        if (Math.Abs(Direction.X) > 0.1f)
-            _sprite.FlipH = Direction.X < 0;
+        float scaleX = Direction.X < 0 ? -1 : Direction.X > 0 ? 1 : _sprite.Scale.X;
+        _sprite.Scale = new Vector2(scaleX, 1);
     }
 }

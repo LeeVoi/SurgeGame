@@ -7,24 +7,20 @@ namespace Characters.Players.PlayerWarrior;
 
 public partial class PlayerWarrior : BaseCharacter
 {
-    private const float normalAttackCost = 10f;
-    private const float hevayAttackCost = 20f;
-    private bool isGaurdActive = false;
+    private bool isGuardActive = false;
     private bool canUseGuard = true;
     private float guardCooldown = 10f;
     private float guardDuration = 2f;
-   
 
     public override void _Ready()
     {
-        // Stamina initialize 
         base._Ready();
+
         maxStamina = 100f;
         stamina = maxStamina;
         staminaRestored = 10f;
         staminaBar = GetNode<ProgressBar>("../UI/StaminaBar");
-        
-        // Health initialize
+
         maxHealth = 100f;
         health = maxHealth;
         healthBar = GetNode<ProgressBar>("../UI/HealthBar");
@@ -32,101 +28,62 @@ public partial class PlayerWarrior : BaseCharacter
         healthBar.Value = health;
     }
 
-
     public override void _PhysicsProcess(double delta)
     {
         base._PhysicsProcess(delta);
         staminaBar.Value = stamina;
     }
-    
-    
+
     public override void UseAbility()
     {
         if (!canUseGuard) return;
 
-        isGaurdActive = true;
+        isGuardActive = true;
         canUseGuard = false;
-       Animation.animatedSprite.Play("Guard");
-       
-        // Timer for guard duration
-        var timer = new Timer();
-        timer.OneShot = true;
-        timer.WaitTime = guardDuration;
+        Animation.animatedSprite.Play("Guard");
+
+        var timer = new Timer { OneShot = true, WaitTime = guardDuration };
         AddChild(timer);
         timer.Timeout += () =>
         {
-            isGaurdActive = false;
-            Vector2 direction = Input.GetVector("move_left", "move_right", "move_up", "move_down");
-            Animation.SetState(direction != Vector2.Zero ? CharacterState.Moving : CharacterState.Idle); 
+            isGuardActive = false;
+            timer.QueueFree();
+            Vector2 dir = Input.GetVector("move_left", "move_right", "move_up", "move_down");
+            Animation.SetState(dir != Vector2.Zero ? CharacterState.Moving : CharacterState.Idle);
         };
         timer.Start();
-        
-        // Timer for guard cooldown 
-        var cooldownTimer = new Timer();
-        cooldownTimer.OneShot = true;
-        cooldownTimer.WaitTime = guardCooldown;
-        AddChild(cooldownTimer);
-        cooldownTimer.Timeout += () =>
-        {
-            canUseGuard = true;
-        };
-        cooldownTimer.Start();
+
+        var cooldown = new Timer { OneShot = true, WaitTime = guardCooldown };
+        AddChild(cooldown);
+        cooldown.Timeout += () => { canUseGuard = true; cooldown.QueueFree(); };
+        cooldown.Start();
     }
 
-    protected override void HandleInput()
-    {
-        base.HandleInput();
-        
-        if (Input.IsActionJustPressed("AttackNormal") && stamina >= normalAttackCost)
-        {
-                Animation.SetState(CharacterState.AttackNormal);
-        }
-        else if (Input.IsActionJustPressed("AttackHeavy") && stamina >= hevayAttackCost)
-        {
-                Animation.SetState(CharacterState.AttackHeavy);
-        }
-    }
-    
-    
-    public override bool CanAttack(float cost)
-    {
-        return stamina >= cost;
-    }
-
-    protected override void UpdateHealthBar()
-    {
-        if (healthBar != null)
-        {
-            healthBar.Value = health;
-        }
-        
-    }
-
-    // Check weather the player can use special ability 
     public override void HandleAbilityInput()
     {
         if (Input.IsActionJustPressed("SpecialAbility"))
         {
             if (canUseGuard)
-            {
                 Animation.SetState(CharacterState.SpecialAbility);
-            }
             else
-            {
-                Console.WriteLine("Guard still cooling down!");
-            }
+                GD.Print("Guard still cooling down!");
         }
     }
 
-    // Block incoming damage if worrier is using special ability 
-    public override void TakeDamage(float amount)
+    public override void TakeDamage(int amount, Node2D attacker)
     {
-        if (isGaurdActive)
+        if (isGuardActive)
         {
-            Console.WriteLine("Attack Blocked No damage taken");
+            GD.Print("Attack Blocked! No damage taken.");
             return;
         }
-        base.TakeDamage(amount);
+        base.TakeDamage(amount, attacker);
     }
-    
+
+    protected override void UpdateHealthBar()
+    {
+        if (healthBar != null)
+            healthBar.Value = health;
+    }
+
 }
