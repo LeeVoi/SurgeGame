@@ -1,16 +1,16 @@
 using Godot;
 using System;
+using System.Reflection.Metadata;
+using Characters.Base.Components.PlayerHelpers;
 using Characters.Entities.CharacterState;
 
 namespace Characters.Base;
 
 public abstract partial class BaseCharacter : CharacterBody2D
 {
-	// --------------- Character Movement ---------------
-	public const float Speed = 300.0f;
-	protected AnimatedSprite2D	animatedSprite;
-	protected float facingDirection = 1;
-	protected CharacterState currentState = CharacterState.Idle;
+	public PlayerMovement Movement { get; private set; }
+	public PlayerAnimation Animation  { get; private set; }
+	
 	// --------------- Stamina System ---------------
 	protected float stamina;
 	protected float maxStamina;
@@ -26,102 +26,25 @@ public abstract partial class BaseCharacter : CharacterBody2D
 	
 	public override void _Ready()
 	{
-		animatedSprite = GetNode<AnimatedSprite2D>("AnimatedSprite2D");
-		animatedSprite.AnimationFinished += OnAnimationFinished;
+		Movement = new PlayerMovement(this);
+		Animation = new PlayerAnimation(this);
+		
 	}
 	
 	public override void _PhysicsProcess(double delta)
 	{
+		//Handle input and animation state
 		HandleInput();
-		HandleMovement();
-		HandleAnimation();
+		// Handle movement & animation rendering
+		Movement.Move();
+		Animation.UpdateAnimation();
+		// Restore stamina
 		stamina = Mathf.Min(maxStamina, stamina + staminaRestored * (float)delta);
-	}
-
-	protected virtual void HandleInput()
-	{
-		if (Input.IsActionPressed("AttackNormal") && CanAttack(10f))
-		{
-			currentState = CharacterState.AttackNormal;
-		}
-		else if (Input.IsActionPressed("AttackHeavy") && CanAttack(20f))
-		{
-			currentState = CharacterState.AttackHeavy;
-		}
-		else if (Input.IsActionPressed("SpecialAbility"))
-		{
-			// handled by subclass
-			HandleAbilityInput();
-		}
-		//Temp 
-		else if (Input.IsActionJustReleased("TakeDamage"))
-		{
-			TakeDamage(20f);
-		}
-		//Temp
-		else
-		{
-			Vector2 direction = Input.GetVector("move_left", "move_right", "move_up", "move_down");
-
-			
-			if (currentState != CharacterState.AttackNormal &&
-			    currentState != CharacterState.AttackHeavy &&
-			    currentState != CharacterState.SpecialAbility)
-			{
-				currentState = direction != Vector2.Zero ? CharacterState.Moving : CharacterState.Idle;
-			}
-		}
-	}
-
-	protected virtual void HandleMovement()
-	{
-		Vector2 direction = Input.GetVector("move_left", "move_right", "move_up", "move_down");
-		if (direction.X != 0)
-		{
-			facingDirection = direction.X;
-			animatedSprite.FlipH = facingDirection < 0;
-		}
-		
-		Vector2 velocity = direction * Speed;
-		Velocity = velocity;
-		MoveAndSlide();
-	}
-
-	protected virtual void HandleAnimation()
-	{
-		switch (currentState)
-		{
-			case CharacterState.Idle:
-				animatedSprite.Play("Idle");
-				break;
-			case CharacterState.Moving:
-				animatedSprite.Play("Run");
-				break;
-			case CharacterState.AttackNormal:
-				animatedSprite.Play("AttackNormal");
-				break;
-			case CharacterState.AttackHeavy:
-				animatedSprite.Play("AttackHeavy");
-				break;
-			case CharacterState.SpecialAbility:
-					UseAbility();
-				break;
-		}
-	}
-
-	// Reset the animation to Idle or running when done attacking
-	protected virtual void OnAnimationFinished()
-	{
-		if (animatedSprite.Animation == "AttackNormal" || animatedSprite.Animation == "AttackHeavy")
-		{
-			Vector2 direction = Input.GetVector("move_left", "move_right", "move_up", "move_down");
-			currentState = direction != Vector2.Zero ? CharacterState.Moving : CharacterState.Idle;
-		}
 	}
 	
 	
 	// -------------- Stamina System -----------------
-	protected bool SpendStamina(float amount)
+	public bool SpendStamina(float amount)
 	{
 		if (stamina >= amount)
 		{
@@ -131,13 +54,12 @@ public abstract partial class BaseCharacter : CharacterBody2D
 		return false;
 	}
 	
-	protected virtual bool CanAttack(float cost)
+	public virtual bool CanAttack(float cost)
 	{
 		return true;
 	}
 	
 	// ------------------- Health System ------------------
-
 	public virtual void TakeDamage(float amount)
 	{
 		health -= amount;
@@ -161,9 +83,13 @@ public abstract partial class BaseCharacter : CharacterBody2D
 	protected virtual void UpdateHealthBar(){ }
 	
 	// Override to control ability 
-	protected virtual void HandleAbilityInput() { }
-	
-	// Override to create and use own ability in subclass
-	protected abstract void UseAbility();
+	public virtual void HandleAbilityInput() { }
+	public abstract void UseAbility();
+
+	// Delegate to be able to override the input in each character class
+	protected virtual void HandleInput()
+	{
+		Animation.UpdateInput();
+	}
 	
 }

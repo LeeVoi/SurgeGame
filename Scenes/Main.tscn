@@ -62,6 +62,7 @@ script = ExtResource("6_50glp")
 EnemyScene = ExtResource("7_jw32o")
 EnemiesPerWave = 1
 SpawnRadius = 300.0
+MaxActiveEnemies = 5
 
 [node name="PlayerWarrior" parent="." instance=ExtResource("6_v1gob")]
 position = Vector2(3680, 2608)
@@ -75,7 +76,6 @@ offset_right = 180.0
 offset_bottom = 30.0
 theme_override_colors/font_color = Color(0.017732361, 0.01773239, 0.017732479, 1)
 theme_override_styles/fill = SubResource("StyleBoxFlat_50glp")
-show_percentage = false
 
 [node name="HealthBar" type="ProgressBar" parent="UI"]
 offset_top = 32.0

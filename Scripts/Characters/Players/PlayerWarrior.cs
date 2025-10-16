@@ -40,13 +40,13 @@ public partial class PlayerWarrior : BaseCharacter
     }
     
     
-    protected override void UseAbility()
+    public override void UseAbility()
     {
         if (!canUseGuard) return;
 
         isGaurdActive = true;
         canUseGuard = false;
-        animatedSprite.Play("Guard");
+       Animation.animatedSprite.Play("Guard");
        
         // Timer for guard duration
         var timer = new Timer();
@@ -57,7 +57,7 @@ public partial class PlayerWarrior : BaseCharacter
         {
             isGaurdActive = false;
             Vector2 direction = Input.GetVector("move_left", "move_right", "move_up", "move_down");
-            currentState = direction != Vector2.Zero ? CharacterState.Moving : CharacterState.Idle;
+            Animation.SetState(direction != Vector2.Zero ? CharacterState.Moving : CharacterState.Idle); 
         };
         timer.Start();
         
@@ -76,27 +76,19 @@ public partial class PlayerWarrior : BaseCharacter
     protected override void HandleInput()
     {
         base.HandleInput();
-
-        if (Input.IsActionJustPressed("AttackNormal"))
+        
+        if (Input.IsActionJustPressed("AttackNormal") && stamina >= normalAttackCost)
         {
-            if (stamina >= normalAttackCost)
-            {
-                SpendStamina(normalAttackCost); 
-                currentState = CharacterState.AttackNormal;
-            }
+                Animation.SetState(CharacterState.AttackNormal);
         }
-        else if (Input.IsActionJustPressed("AttackHeavy"))
+        else if (Input.IsActionJustPressed("AttackHeavy") && stamina >= hevayAttackCost)
         {
-            if (stamina >= hevayAttackCost)
-            {
-                SpendStamina(hevayAttackCost);
-                currentState = CharacterState.AttackHeavy;
-            }
+                Animation.SetState(CharacterState.AttackHeavy);
         }
     }
     
     
-    protected override bool CanAttack(float cost)
+    public override bool CanAttack(float cost)
     {
         return stamina >= cost;
     }
@@ -111,17 +103,17 @@ public partial class PlayerWarrior : BaseCharacter
     }
 
     // Check weather the player can use special ability 
-    protected override void HandleAbilityInput()
+    public override void HandleAbilityInput()
     {
         if (Input.IsActionJustPressed("SpecialAbility"))
         {
             if (canUseGuard)
             {
-                currentState = CharacterState.SpecialAbility;
+                Animation.SetState(CharacterState.SpecialAbility);
             }
             else
             {
-                GD.Print("Guard still cooling down!");
+                Console.WriteLine("Guard still cooling down!");
             }
         }
     }
